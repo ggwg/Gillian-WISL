@@ -41,7 +41,7 @@ lemma dlsegr_append_left {
   proof:
     unfold dlsegr(z, y, v, x, alpha);
     if (#alpha = nil) {
-      fold dlsegr(x, x, w, w, [], 0);
+      fold dlsegr(x, x, w, w, []);
       fold dlsegr(x, y, v, w, a :: alpha)
     } else {
       assert {bind: #b, #l, #beta} (alpha == #beta @ [#b]) * (v -> #b, y, #l) * dlsegr(z, v, #l, x, #beta);
@@ -111,31 +111,25 @@ lemma dlseg_concat {
 }
 
 // List concatenation
+// There are lemmas to apply, unfolds and folds.
+// Be careful of the state at the beginning!
+// Gillian automatically unfolds the `dlists` in the precondition,
+// because they are not recursive predicates and only have one definition,
+// and therefore can be safely unfolded.
 { (x_a == #x_a) * (v_a == #v_a) * (x_b == #x_b) * (v_b == #v_b) *
   dlist(#x_a, #v_a, #alpha) * dlist(#x_b, #v_b, #beta) }
 function concat(x_a, v_a, x_b, v_b) {
-  [[ unfold dlsegl(x_a, null, v_a, null, #alpha) ]];
   r := new(2);
   if (x_a = null) {
     [r] := x_b;
     [r+1] := v_b
   } else {
     if (x_b = null) {
-      [[ unfold dlsegl(x_b, null, v_b, null, #beta) ]];
       [r] := x_a;
       [r+1] := v_a;
-      [[ fold dlsegl(x_a, null, v_a, null) ]]
     } else {
-      [[ fold dlsegl(x_a, null, v_a, null, #alpha) ]];
-      [[ apply dlseg_l_to_r(x_a, null, v_a, null, #alpha) ]];
-      [[ unfold dlsegr(x_a, null, v_a, null, #alpha) ]];
-      [[ unfold dlsegl(x_b, null, v_b, null, #beta) ]];
       [v_a + 1] := x_b;
       [x_b + 2] := v_a;
-      [[ fold dlsegr(x_a, x_b, v_a, null, #alpha) ]];
-      [[ apply dlseg_r_to_l(x_a, x_b, v_a, null, #alpha) ]];
-      [[ fold dlsegl(x_b, null, v_b, v_a) ]];
-      [[ apply dlseg_concat(x_a, v_a, null, #alpha, x_b, null, v_b, #beta) ]];
       [r] := x_a;
       [r+1] := v_b
     }
