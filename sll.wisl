@@ -56,6 +56,8 @@ lemma list_member_concat {
 function SLL_allocate_node(v){
   t := new(2);
   [t] := v;
+  [[ fold SLL(null, []) ]];
+  [[ fold SLL(t, [ #v ]) ]];
   return t
 }
 { SLL(ret, [ #v ]) }
@@ -69,7 +71,9 @@ function SLL_allocate_node(v){
 { (x == #x) * (k == #k) * SLL(#x, #vs) }
 function SLL_prepend(x, k){
     z := SLL_allocate_node(k);
+    [[ unfold SLL(z, [ #k ] ) ]];
     [z + 1] := x;
+    [[ fold SLL(z, #k :: #vs) ]];
     return z
 }
 { SLL(ret, #k :: #vs) }
@@ -78,11 +82,14 @@ function SLL_prepend(x, k){
 { (x == #x) * (k == #k) * SLL(#x, #vs) }
 function SLL_append(x, k){
   if (x = null) {
+    [[ unfold SLL(#x, #vs) ]];
     x := SLL_allocate_node(k)
-    } else {
-      t := [x + 1];
-      z := SLL_append(t, k);
-      [x + 1] := z
+  } else {
+    [[ unfold SLL(#x, #vs) ]];
+    t := [x + 1];
+    z := SLL_append(t, k);
+    [x + 1] := z;
+    [[ fold SLL(#x, #vs @ [#k]) ]]
   };
   return x
 }
@@ -92,11 +99,14 @@ function SLL_append(x, k){
 { (x == #x) * (y == #y) * SLL(#x, #vs) * SLL(#y, [#vy]) }
 function SLL_append_node(x, y) {
   if (x = null) {
+    [[ unfold SLL(#x, #vs) ]];
     x := y
   } else {
+    [[ unfold SLL(#x, #vs) ]];
     t := [x + 1];
     z := SLL_append_node(t, y);
-    [x + 1] := z
+    [x + 1] := z;
+    [[ fold SLL(#x, #vs @ [#vy]) ]]
   };
   return x
 }
@@ -106,11 +116,14 @@ function SLL_append_node(x, y) {
 {(x == #x) * (y == #y) * SLL(#x, #vx) * SLL(#y, #vy) }
 function SLL_concat(x, y) {
   if (x = null){
+    [[ unfold SLL(#x, #vx) ]];
     x := y
   } else {
+    [[ unfold SLL(#x, #vx) ]];
     t := [x + 1];
     z := SLL_concat(t, y);
-    [x + 1] := z
+    [x + 1] := z;
+    [[ fold SLL(#x, #vx @ #vy) ]]
   };
   return x
 }
@@ -121,12 +134,20 @@ function SLL_concat(x, y) {
 function SLL_copy(x){
   y := null;
   if (not (x = null)) {
+    [[ unfold SLL(#x, #vs) ]];
     k := [x];
     y := SLL_allocate_node(k);
+    // [[ asset {bind: #y} (y ->)]]
+    [[ unfold SLL(y, k) ]];
     t := [x + 1];
     z := SLL_copy(t);
-    [y + 1] := z
+    [y + 1] := z;
+    [[ fold SLL(y, #vs) ]];
+    [[ fold SLL(#x, #vs) ]]
   } else {
+    [[ unfold SLL(#x, #vs) ]];
+    [[ fold SLL(y, #vs) ]];
+    [[ fold SLL(#x, #vs) ]];
     skip
   };
   return y
