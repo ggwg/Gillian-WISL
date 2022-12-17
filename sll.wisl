@@ -159,11 +159,15 @@ function SLL_copy(x){
 function SLL_length(x) {
   n := 0;
   if (x = null){
-    n := 0
+    [[ unfold SLL(#x, #vs) ]];
+    n := 0;
+    [[assert n == len(#vs) ]]
   } else {
+    [[ unfold SLL(#x, #vs) ]];
     t := [x + 1];
     n := SLL_length(t);
-    n := 1 + n
+    n := 1 + n;
+    [[assert n == len(#vs) ]]
   };
   return n
 }
@@ -173,12 +177,19 @@ function SLL_length(x) {
 { (x == #x) *  SLL(#x, #vs) }
 function SLL_reverse(x){
   if (not (x = null)) {
+    [[ unfold SLL(#x, #vs) ]];
+    [[ assert {bind: #nv, #nvs} (#vs == #nv :: #nvs) ]];
     t := [x + 1];
+    // [[ fold SSL(t, #nvs)]]
     [x + 1] := null;
     z := SLL_reverse(t);
-    y := SLL_append_node(z, x)
+    [[ unfold SLL(z, rev #nvs) ]];
+    y := SLL_append_node(z, x);
+    [[ fold SLL(y, rev #vs) ]]
   } else {
-    y := null
+    [[ unfold SLL(#x, #vs) ]];
+    y := null;
+    [[ fold SLL(y, rev #vs) ]]
   };
   return y
 }
@@ -189,11 +200,19 @@ function SLL_reverse(x){
 function SLL_member(x, k){
   found := false;
   if (x = null){
-    skip
+    [[ unfold SLL(#x, #vs) ]];
+    [[ unfold list_member(#vs, #k, #r) ]];
+    skip;
+    [[ assert (found == #r) ]];
+    [[ fold list_member(#vs, #k, #r) ]];
+    [[ fold SLL(#x, #vs) ]]
   } else {
+    [[ unfold SLL(#x, #vs) ]];
+    // [[ assert {bind: #nv, #nvs} (#vs == #nv :: #nvs) ]];
     v := [x];
     if (v = k){
-      found := true
+      found := true;
+      [[ assert list_member(#vs, v, #r) ]]
     } else {
       t := [x + 1];
       found := SLL_member(t, k)
